@@ -1,9 +1,11 @@
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from .models import Category, MenuItem, Cart, Order, OrderItem
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer
+from django.contrib.auth.models import Group, User
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerilializer
 from .permissions import IsManagerOrAdmin
 
 
@@ -65,7 +67,7 @@ class CartView(generics.ListCreateAPIView):
         Cart.objects.all().filter(user=self.request.user).delete()
         return Response("ok")
 
-
+# Orders
 class OrderView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -76,7 +78,7 @@ class OrderView(generics.ListCreateAPIView):
             return Order.objects.all()
         elif self.request.user.groups.count()==0: #normal customer
             return Order.objects.all().filter(user=self.request.user)
-        elif self.request.user.groups.filter(name='Delivery Crew').exists(): #delivery crew
+        elif self.request.user.groups.filter(name='Delivery crew').exists(): #delivery crew
             return Order.objects.all().filter(delivery_crew=self.request.user)  #only show oreders assigned to him
         else: #manager
             return Order.objects.all()
@@ -129,3 +131,52 @@ class SingleOrderView(generics.RetrieveUpdateAPIView):
             return Response('Unauthorized to update orders', status=status.HTTP_403_FORBIDDEN)
         else: #everyone else - Super Admin, Manager and Delivery Crew
             return super().update(request, *args, **kwargs)
+
+
+# Groups
+class ManagerViewSet(viewsets.ViewSet):
+    permission_classes = [IsManagerOrAdmin]
+    def list(self, request):
+        users = User.objects.all().filter(groups__name='Manager')
+        items = UserSerilializer(users, many=True)
+        return Response(items.data)
+
+    def create(self, request):
+        user = get_object_or_404(User, username=request.data['username'])
+        managers = Group.objects.get(name="Manager")
+        managers.user_set.add(user)
+        return Response({"message": "user added to the manager group"}, 200)
+
+    def destroy(self, request):
+        user = get_object_or_404(User, username=request.data['username'])
+        managers = Group.objects.get(name="Manager")
+        managers.user_set.remove(user)
+        return Response({"message": "user removed from the manager group"}, 200)
+
+class DeliveryCrewViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+    def list(self, request):
+        users = User.objects.all().filter(groups__name='Delivery crew')
+        items = UserSerilializer(users, many=True)
+        return Response(items.data)
+
+    def create(self, request):
+        #only for super admin and managers
+        if self.request.user.is_superuser == False:
+            if self.request.user.groups.filter(name='Manager').exists() == False:
+                return Response({"message":"Unauthorized to assign groups"}, status.HTTP_403_FORBIDDEN)
+        
+        user = get_object_or_404(User, username=request.data['username'])
+        dc = Group.objects.get(name="Delivery crew")
+        dc.user_set.add(user)
+        return Response({"message": "user added to the delivery crew group"}, 200)
+
+    def destroy(self, request):
+        #only for super admin and managers
+        if self.request.user.is_superuser == False:
+            if self.request.user.groups.filter(name='Manager').exists() == False:
+                return Response({"message":"forbidden"}, status.HTTP_403_FORBIDDEN)
+        user = get_object_or_404(User, username=request.data['username'])
+        dc = Group.objects.get(name="Delivery crew")
+        dc.user_set.remove(user)
+        return Response({"message": "user removed from the delivery crew group"}, 200)
