@@ -6,4 +6,5 @@ urlpatterns = [
     path('categories/<int:pk>', views.SingleCategoryView.as_view()),
     path('menu-items', views.MenuItemView.as_view()),
     path('menu-items/<int:pk>', views.SingleMenuItemView.as_view()),
+    path('cart/menu-items', views.CartView.as_view()),
 ]

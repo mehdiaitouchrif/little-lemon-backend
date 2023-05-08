@@ -1,7 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from .models import Category, MenuItem
-from .serializers import CategorySerializer, MenuItemSerializer
+from rest_framework.response import Response
+from .models import Category, MenuItem, Cart
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer
 from .permissions import IsManagerOrAdmin
 
 
@@ -49,3 +50,16 @@ class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method != 'GET':
             permission_classes = [IsManagerOrAdmin, IsAuthenticated]
         return [permission() for permission in permission_classes]
+    
+# Cart View
+class CartView(generics.ListCreateAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Cart.objects.all().filter(user=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        Cart.objects.all().filter(user=self.request.user).delete()
+        return Response("ok")
