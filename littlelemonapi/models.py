@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils.translation import gettext_lazy as _
 
 class Category(models.Model):
     slug = models.SlugField()
@@ -49,3 +49,17 @@ class OrderItem(models.Model):
 
     class Meta:
         unique_together = ('order', 'menuitem')
+
+
+class Occasion(models.TextChoices):
+    ANNIVERSARY = 'anniversary', _('Anniversary')
+    BIRTHDAY = 'birthday', _('Birthday')
+    NORMAL = 'normal', _('Normal')
+
+class Reservation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField()
+    time = models.TimeField()
+    num_guests = models.PositiveIntegerField()
+    occasion = models.CharField(max_length=50, choices=Occasion.choices, default=Occasion.NORMAL)
+    message = models.TextField(blank=True)
