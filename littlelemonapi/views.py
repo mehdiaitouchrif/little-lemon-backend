@@ -1,12 +1,14 @@
 from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from .models import Category, MenuItem, Cart, Order, OrderItem
+from .models import Category, MenuItem, Cart, Order, OrderItem, Reservation
 from django.contrib.auth.models import Group, User
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerilializer
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerilializer, ReservationSerializer
 from .permissions import IsManagerOrAdmin
+import datetime
 
 
 # Categories
@@ -180,3 +182,66 @@ class DeliveryCrewViewSet(viewsets.ViewSet):
         dc = Group.objects.get(name="Delivery crew")
         dc.user_set.remove(user)
         return Response({"message": "user removed from the delivery crew group"}, 200)
+
+
+class ReservationListCreateView(generics.ListCreateAPIView):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def is_table_available(self, date, time, num_guests):
+        # Check if time is within booking hours (10 AM to 10 PM)
+        requested_time = datetime.time.fromisoformat(str(time))
+        if not (10 <= requested_time.hour < 22):
+            return False
+
+        # Check if table is available for the given date, time, and number of guests
+        reservations = Reservation.objects.filter(date=date, time=time)
+        total_guests = sum(r.num_guests for r in reservations)
+        available_tables = 4 - len(reservations)
+        return total_guests + num_guests <= available_tables * 6
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['user'] = self.request.user.id
+        request.data['user'] = self.request.user.id
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        # Check if table is available at the given date, time, and number of guests
+        date = serializer.validated_data['date']
+        time = serializer.validated_data['time']
+        num_guests = serializer.validated_data['num_guests']
+        if not self.is_table_available(date, time, num_guests):
+            return Response({'message': 'Sorry, no tables available for the selected date and time.'})
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class ReservationUpdateView(APIView):
+    def get(self, request, pk):
+        reservation = get_object_or_404(Reservation, pk=pk)
+        serializer = ReservationSerializer(reservation)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        reservation = get_object_or_404(Reservation, pk=pk)
+        data = request.data.copy()
+        data['user'] = self.request.user.id
+        serializer = ReservationSerializer(reservation, data=data)
+        if serializer.is_valid():
+            if not ReservationListCreateView().is_table_available(serializer.validated_data['date'], serializer.validated_data['time'], serializer.validated_data['num_guests']):
+                return Response({'message': 'Table is not available at this time.'}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        reservation = get_object_or_404(Reservation, pk=pk)
+        reservation.delete()
+        return Response({'message': 'Reservation canceled'} ,status=status.HTTP_204_NO_CONTENT)
