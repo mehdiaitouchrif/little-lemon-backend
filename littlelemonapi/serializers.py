@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Category, MenuItem, Cart, Order, OrderItem, Reservation, Occasion
+from .models import Category, MenuItem, Cart, Order, OrderItem, Reservation, Occasion, MenuItemImage
 
 class CategorySerializer (serializers.ModelSerializer):
     class Meta:
@@ -8,21 +8,30 @@ class CategorySerializer (serializers.ModelSerializer):
         fields = ['id', 'title', 'slug']
 
 
+class MenuItemImageSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        menu_item_id = self.context['menu_item_id']        
+        return MenuItemImage.objects.create(menu_item_id=menu_item_id, **validated_data)
+
+    class Meta: 
+        model = MenuItemImage
+        fields = ['id', 'image']
+
 class MenuItemSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all()
     )
+
+    images = MenuItemImageSerializer(many=True)
     class Meta:
         model = MenuItem
-        fields = ['id', 'title', 'price', 'category', 'featured']
-
+        fields = ['id', 'title', 'price', 'category', 'featured', 'images']
 
 class CartSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         default=serializers.CurrentUserDefault()
     )
-
 
     def validate(self, attrs):
         attrs['price'] = attrs['quantity'] * attrs['unit_price']

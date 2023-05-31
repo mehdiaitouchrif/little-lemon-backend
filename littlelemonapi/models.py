@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from .validators import validate_file_size
 
 class Category(models.Model):
     slug = models.SlugField()
@@ -18,6 +19,14 @@ class MenuItem(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class MenuItemImage(models.Model):
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='restaurant/images', validators=[validate_file_size])
+
+    def __str__(self) -> str:
+        return f"{self.menu_item.title}_{self.image}"
 
 
 class Cart(models.Model):

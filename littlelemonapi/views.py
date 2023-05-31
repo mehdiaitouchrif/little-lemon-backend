@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from .models import Category, MenuItem, Cart, Order, OrderItem, Reservation
+from .models import Category, MenuItem, Cart, Order, OrderItem, Reservation, MenuItemImage
 from django.contrib.auth.models import Group, User
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerilializer, ReservationSerializer
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerilializer, ReservationSerializer, MenuItemImageSerializer
 from .permissions import IsManagerOrAdmin
 import datetime
 
@@ -35,7 +35,7 @@ class SingleCategoryView(generics.RetrieveUpdateDestroyAPIView):
 
 # Menu Items
 class MenuItemView(generics.ListCreateAPIView):
-    queryset = MenuItem.objects.all()
+    queryset = MenuItem.objects.prefetch_related('images').all()
     serializer_class = MenuItemSerializer
     search_fields = ['category__title', 'title']
     ordering_fields = ['price', 'title']
@@ -55,7 +55,32 @@ class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method != 'GET':
             permission_classes = [IsManagerOrAdmin, IsAuthenticated]
         return [permission() for permission in permission_classes]
-    
+
+
+class MenuItemImageView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = MenuItemImageSerializer
+    lookup_url_kwarg = 'pk'  # Use 'pk' as the lookup keyword argument
+
+    def get_queryset(self):
+        menu_item_pk = self.kwargs['menu_item_pk']
+        return MenuItemImage.objects.filter(menu_item__pk=menu_item_pk)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+class MenuItemImageViewSet(viewsets.ModelViewSet):
+    serializer_class = MenuItemImageSerializer
+
+    def get_serializer_context(self):
+        return {'menu_item_id': self.kwargs['menu_item_pk']}
+
+    def get_queryset(self):
+        menu_item_pk = self.kwargs['menu_item_pk']
+        return MenuItemImage.objects.filter(menu_item__pk=menu_item_pk)
+
 # Cart View
 class CartView(generics.ListCreateAPIView):
     queryset = Cart.objects.all()
