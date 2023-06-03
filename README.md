@@ -33,6 +33,14 @@ source env/bin/activate
    python manage.py runserver
 ```
 
+## Database Diagram
+
+The following diagram illustrates the structure and relationships of the database models used in this project.
+
+![Little Lemon Database](https://github.com/mehdiaitouchrif/little-lemon-backend/assets/112659075/a460bb3e-83b2-44f9-8a82-047a8c6592e5)
+
+The diagram showcases the key components of the app, including menus, orders, reservations, and user-related information. It visually represents how these entities are interconnected, enabling users to order food online, make reservations, and more.
+
 ## Endpoints
 
 ### User Authentication Endpoints
