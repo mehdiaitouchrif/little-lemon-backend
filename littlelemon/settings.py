@@ -161,14 +161,9 @@ REST_FRAMEWORK = {
     }
 }
 
-INTERNAL_IPS = [
-    '127.0.0.1'
-]
+INTERNAL_IPS = []
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-]
+CORS_ALLOWED_ORIGINS = ['http://*', 'https://*']
 
 DJOSER = {
     'USER_ID_FIELD': 'username'
