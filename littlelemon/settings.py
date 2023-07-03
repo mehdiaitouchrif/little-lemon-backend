@@ -25,8 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+if os.getenv('ENVIRONMENT') == 'DEVELOPMENT':
+    DEBUG = True
+else:
+    DEBUG = False
 ALLOWED_HOSTS = ['localhost', 'little-lemon-backend.onrender.com']
 
 
