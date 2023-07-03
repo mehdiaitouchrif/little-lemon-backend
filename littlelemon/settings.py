@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-c*g#sm5x*q00@-gup9@8&nv-@za&tn)!6nfx&0tu3h^61d4(#2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'little-lemon-backend.onrender.com']
 
 
 # Application definition
