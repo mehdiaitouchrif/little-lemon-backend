@@ -36,7 +36,6 @@ schema_view = get_schema_view(
                        Users can register, login, and logout, while customers can browse the menu, add items to their cart, and place orders. Managers have full control over categories and menu items, can update orders, 
                        assign delivery crew members, and manage customer groups. Delivery crew users can easily update their assigned orders. This API provides a robust foundation for efficient operations and a seamless user experience 
                        within the Little Lemon app.""",
-        terms_of_service="https://www.example.com/policies/terms/",
         license=openapi.License(name="MIT License"),
     ),
     public=True,
@@ -46,8 +45,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('littlelemonapi.urls')),
-    path('api/', include('djoser.urls')),
-    path('api/', include('djoser.urls.authtoken')),
     path('api/', include(router.urls)),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('__debug__/', include('debug_toolbar.urls'))

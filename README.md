@@ -49,11 +49,12 @@ The diagram showcases the key components of the app, including menus, orders, re
 
 ### User Authentication Endpoints
 
-| Endpoint               | Role                                | Method | Purpose                                                                     |
-| ---------------------- | ----------------------------------- | ------ | --------------------------------------------------------------------------- |
-| /api/auth/users/       | No role required                    | POST   | Registers a new user and returns 201 - Created HTTP status code             |
-| /api/auth/users/me/    | Anyone with a valid user token      | POST   | Displays only the current user                                              |
-| /api/auth/token/login/ | Anyone with valid login credentials | POST   | Generates access tokens that can be used in other API calls in this project |
+| Endpoint                | Role                            | Method | Purpose                                                                    |
+| ----------------------- | ------------------------------- | ------ | -------------------------------------------------------------------------- |
+| /api/auth/register      | No role required                | POST   | Registers a new user and returns 201 - Created HTTP status code            |
+| /api/auth/profile       | Anyone with a valid user token  | POST   | Displays only the current user                                             |
+| /api/auth/token/refresh | Anyone with valid refresh token | POST   | Generates access token that can be used in other API calls in this project |
+| /api/auth/logout        | Logs the user out               | POST   | Generates access token that can be used in other API calls in this project |
 
 ### Menu-items endpoints
 

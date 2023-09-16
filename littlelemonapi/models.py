@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from .validators import validate_file_size
 
+
 class Category(models.Model):
     slug = models.SlugField()
     title = models.CharField(max_length=255, db_index=True)

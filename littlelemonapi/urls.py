@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from . import authentication
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('categories', views.CategoriesView.as_view()),
@@ -14,5 +16,10 @@ urlpatterns = [
     path('groups/manager/users', views.ManagerViewSet.as_view(
         {'get': 'list', 'post': 'create', 'delete': 'destroy'})),
     path('groups/delivery-crew/users', views.DeliveryCrewViewSet.as_view(
-        {'get': 'list', 'post': 'create', 'delete': 'destroy'}))
+        {'get': 'list', 'post': 'create', 'delete': 'destroy'})),
+    path('auth/register', authentication.UserRegisterView.as_view(), name='register_user'),
+    path('auth/login', authentication.UserLoginView.as_view(), name='user_login'),
+    path('auth/profile', authentication.UserProfileView.as_view(), name='get_user_profile'),
+    path('auth/logout', authentication.UserLogoutView.as_view(), name='user_logout'),
+    path('auth/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
 ]

@@ -6,11 +6,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from .models import Category, MenuItem, Cart, Order, OrderItem, Reservation, MenuItemImage
 from django.contrib.auth.models import Group, User
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerilializer, ReservationSerializer, MenuItemImageSerializer
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, UserSerializer, ReservationSerializer, MenuItemImageSerializer
 from .permissions import IsManagerOrAdmin
 import datetime
-
-
+    
 # Categories
 class CategoriesView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -165,7 +164,7 @@ class ManagerViewSet(viewsets.ViewSet):
     permission_classes = [IsManagerOrAdmin]
     def list(self, request):
         users = User.objects.all().filter(groups__name='Manager')
-        items = UserSerilializer(users, many=True)
+        items = UserSerializer(users, many=True)
         return Response(items.data)
 
     def create(self, request):
@@ -184,7 +183,7 @@ class DeliveryCrewViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     def list(self, request):
         users = User.objects.all().filter(groups__name='Delivery crew')
-        items = UserSerilializer(users, many=True)
+        items = UserSerializer(users, many=True)
         return Response(items.data)
 
     def create(self, request):
@@ -270,3 +269,4 @@ class ReservationUpdateView(APIView):
         reservation = get_object_or_404(Reservation, pk=pk)
         reservation.delete()
         return Response({'message': 'Reservation canceled'} ,status=status.HTTP_204_NO_CONTENT)
+    
