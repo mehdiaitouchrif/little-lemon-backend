@@ -13,6 +13,8 @@
 
 [View Live API Website/Docs](https://little-lemon-backend.onrender.com/)
 
+![Deployed backend website with documentation screenshot](https://github.com/mehdiaitouchrif/little-lemon-backend/assets/112659075/349fb2ef-3156-4573-ac71-1e89e8a959f2)
+
 ## Installation
 
 1. Clone the repository
@@ -111,6 +113,15 @@ The diagram showcases the key components of the app, including menus, orders, re
 | `/api/orders/{orderId}` | Manager       | DELETE     | Deletes this order                                                                                                                                                                                |
 | `/api/orders`           | Delivery crew | GET        | Returns all orders with order items assigned to the delivery crew                                                                                                                                 |
 | `/api/orders/{orderId}` | Delivery crew | PATCH      | Updates the order status to 0 or 1                                                                                                                                                                |
+
+### Reservation management endpoints
+
+| Endpoint                 | Role     | Method | Purpose                                                                 |
+| ------------------------ | -------- | ------ | ----------------------------------------------------------------------- |
+| `/api/reservations`      | Customer | GET    | List user reservations                                                  |
+| `/api/reservations`      | Customer | POST   | Create a reservation                                                    |
+| `/api/reservations/{id}` | Customer | PUT    | Update reservation options eg. num of guests, date, time, occasion..etc |
+| `/api/reservations/{id}` | Customer | DELETE | Cancel a reservation                                                    |
 
 ## License
 
