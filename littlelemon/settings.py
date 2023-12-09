@@ -3,6 +3,8 @@ from pathlib import Path
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from datetime import timedelta
+# from corsheaders.defaults import default_headers
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -174,5 +176,19 @@ SIMPLE_JWT = {
 
 INTERNAL_IPS = []
 
+
+
+# Allowed origins
 CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'https://little-lemon-pi.vercel.app']
 
+
+# Allow credentials
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Set-Cookie']
+
+CORS_ALLOW_METHODS = ['*']
+
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "*"
+]
