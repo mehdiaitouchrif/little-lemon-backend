@@ -1,12 +1,17 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.utils import timezone
+from datetime import timedelta
+
 
 class UserRegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         username = request.data.get('username')
         email = request.data.get('email')
@@ -37,12 +42,17 @@ class UserRegisterView(APIView):
             'username': user.username,
             'email': user.email,
             'groups': [group.name for group in user.groups.all()],
-            'access_token': access_token,
-            'refresh_token': refresh_token
         }
-        return Response(response_data, status=status.HTTP_201_CREATED)
+
+        response = Response(response_data, status=status.HTTP_201_CREATED)
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+        response.set_cookie(key='access_token', value=access_token, httponly=True)
+        return response
+
 
 class UserLoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -66,10 +76,12 @@ class UserLoginView(APIView):
                 'username': user.username,
                 'email': user.email,
                 'groups': [group.name for group in user.groups.all()],
-                'access_token': access_token,
-                'refresh_token': refresh_token
             }
-            return Response(response_data, status=status.HTTP_200_OK)
+            
+            response = Response(response_data, status=status.HTTP_200_OK)
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+            response.set_cookie(key='access_token', value=access_token, httponly=True)
+            return response
         else:
             # Both authentication attempts failed
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -87,9 +99,17 @@ class UserProfileView(APIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
+
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         logout(request)
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+        response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+
+        # Set cookies to expire in the past
+        response.set_cookie('access_token', '', expires=timezone.now() - timedelta(days=1), httponly=True)
+        response.set_cookie('refresh_token', '', expires=timezone.now() - timedelta(days=1), httponly=True)
+
+        return response
+

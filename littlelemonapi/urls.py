@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
-from . import authentication
-from rest_framework_simplejwt.views import TokenRefreshView
+from .authentication import authentication
+from littlelemonapi.authentication.refresh import CustomTokenRefreshView
+
 
 urlpatterns = [
     path('categories', views.CategoriesView.as_view()),
@@ -21,5 +22,5 @@ urlpatterns = [
     path('auth/login', authentication.UserLoginView.as_view(), name='user_login'),
     path('auth/profile', authentication.UserProfileView.as_view(), name='get_user_profile'),
     path('auth/logout', authentication.UserLogoutView.as_view(), name='user_logout'),
-    path('auth/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/token/refresh', CustomTokenRefreshView.as_view(), name='token_refresh'),
 ]

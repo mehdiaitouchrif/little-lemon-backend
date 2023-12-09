@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'littlelemonapi',
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
-    # 'djoser',
     'debug_toolbar',
 ]
 
@@ -148,10 +147,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'littlelemonapi.authentication.cookie_access.CookieJWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2,
+    'PAGE_SIZE': 9,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
@@ -162,16 +162,15 @@ REST_FRAMEWORK = {
     }
 }
 
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
-    'SLIDING_TOKEN_REFRESH_AFTER': timedelta(days=7),
-    'SLIDING_TOKEN_REFRESH_SLIDING': True,
-    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
-    'SLIDING_TOKEN_REFRESH_AFTER': timedelta(days=7),
+    'SLIDING_TOKEN_REFRESH_AFTER': timedelta(days=1),
     'SLIDING_TOKEN_REFRESH_SLIDING': True,
 }
+
 
 INTERNAL_IPS = []
 
